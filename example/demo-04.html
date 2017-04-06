@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>demo-04</title>
+    <script src="../vendor/three.js"></script>
+    <script src="../vendor/stats.js"></script>
+    <script src="../vendor/Tween.js"></script>
+    <style>
+        #canvas-wrapper {
+            position: relative;
+            border: none;
+            width: 100%;
+            height: 600px;
+            background-color: #EEEEEE;
+        }
+    </style>
+</head>
+<body>
+<div id="canvas-wrapper"></div>
+<ul>
+    <li>知道怎么打灯光</li>
+    <li>物体本身的颜色对灯光有影响</li>
+    <li>知道怎么引入 Tween.js ，并使用</li>
+</ul>
+<script>
+    window.onload = function () {
+        var renderer, camera, scene, mesh, light,stats;
+        var canvasWrapper = document.getElementById('canvas-wrapper');
+        var width = canvasWrapper.clientWidth;
+        var height = canvasWrapper.clientHeight;
+
+        function initThree() {
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+            });
+            renderer.setSize(width, height);
+            canvasWrapper.appendChild(renderer.domElement);
+        }
+
+        function initCamera() {
+            camera = new THREE.PerspectiveCamera(60, width / height, 1, 10000);
+            camera.position.z = 380;
+        }
+
+        function initScene() {
+            scene = new THREE.Scene();
+            scene.add(camera);
+        }
+
+        function initObject() {
+            var geometry = new THREE.CylinderGeometry( 30,80,200);
+            var material = new THREE.MeshLambertMaterial( { color:0xffffff} );
+            mesh = new THREE.Mesh( geometry,material);
+            scene.add(mesh);
+        }
+
+        function initLight() {
+            light = new THREE.AmbientLight(0xFF0000);
+            light.position.set(100, 1000, 200);
+            scene.add(light);
+            light = new THREE.PointLight(0x00FF00);
+            light.position.set(0, 0,300);
+            scene.add(light);
+        }
+
+        function initStats() {
+            stats = new Stats();
+            stats.dom.style.position = 'absolute';
+            stats.dom.style.left = 'inherit';
+            stats.dom.style.right = '0px';
+            canvasWrapper.appendChild( stats.dom );
+            function animate() {
+                stats.begin();
+                // monitored code goes here
+                stats.end();
+                requestAnimationFrame( animate );
+            }
+            animate();
+        }
+
+        function initTween(){
+            new TWEEN.Tween( mesh.position)
+                    .to( { x: -400 }, 3000 )
+                    .repeat( Infinity )
+                    .start();
+        }
+
+        function animation() {
+            mesh.rotation.y += 0.01;
+            renderer.clear();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animation);
+            TWEEN.update();
+        }
+
+        function threeStart() {
+            initThree();
+            initCamera();
+            initScene();
+            initLight();
+            initObject();
+            initStats();
+            initTween();
+            animation();
+        }
+
+        threeStart();
+    }
+</script>
+</body>
+</html>

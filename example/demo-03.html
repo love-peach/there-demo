@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>demo-03</title>
+    <script src="../vendor/three.js" data-ke-src="./vendor/three.js"></script>
+    <script src="../vendor/stats.js" data-ke-src="./vendor/stats.js"></script>
+    <style>
+        #canvas-wrapper {
+            border: none;
+            width: 100%;
+            height: 600px;
+            background-color: #EEEEEE;
+        }
+    </style>
+</head>
+<body>
+<div id="canvas-wrapper"></div>
+<ul>
+    <li>知道怎么画坐标系，重复线段的绘制</li>
+    <li>知道怎么使用 stats.js 来监测页面的性能</li>
+    <li>知道怎么添加自定义的监测维度</li>
+    <li>知道 performance</li>
+</ul>
+<script>
+    window.onload = function () {
+        var renderer, camera, scene, line;
+        var canvasWrapper = document.getElementById('canvas-wrapper');
+        var width = canvasWrapper.clientWidth;
+        var height = canvasWrapper.clientHeight;
+
+        function initThree() {
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+            });
+            renderer.setSize(width, height);
+            canvasWrapper.appendChild(renderer.domElement);
+        }
+
+        function initCamera() {
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+            camera.position.z = 380;
+        }
+
+        function initScene() {
+            scene = new THREE.Scene()
+        }
+
+        function initObject() {
+            var geometry = new THREE.Geometry();
+            geometry.vertices.push(new THREE.Vector3(-100, 0, 0));
+            geometry.vertices.push(new THREE.Vector3(100, 0, 0));
+            var color1 = new THREE.Color(0xff0000);
+            var color2 = new THREE.Color(0x00ff00);
+            geometry.colors.push(color1, color2);
+
+            for (var i = 0; i <= 20; i++) {
+                line = new THREE.Line(geometry, new THREE.LineBasicMaterial({vertexColors: true}));
+                line.position.y = ( i * 10 ) - 100;
+                scene.add(line);
+
+                line = new THREE.Line(geometry, new THREE.LineBasicMaterial({vertexColors: true}));
+                line.position.x = ( i * 10 ) - 100;
+                line.rotation.z = 90 * Math.PI / 180;
+                scene.add(line);
+            }
+        }
+
+        function initStats() {
+            var stats = new Stats();
+            stats.showPanel( 3 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+            stats.dom.style.left = 'inherit';
+            stats.dom.style.right = '0px';
+
+            var xPanel = stats.addPanel( new Stats.Panel( '自定义的标题', '#ff8', '#221' ) );
+            document.body.appendChild( stats.dom );
+            function animate() {
+                stats.begin();
+                // monitored code goes here
+                stats.end();
+                var time = performance.now() / 1000;
+                var x = Math.cos( time ) + 1.1;
+                xPanel.update( x , 2.1 );
+                requestAnimationFrame( animate );
+            }
+            animate();
+        }
+
+        function render() {
+            camera.rotation.z += 0.01;
+            renderer.clear();
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+
+        function threeStart() {
+            initThree();
+            initCamera();
+            initScene();
+            initObject();
+            render();
+            initStats();
+        }
+
+        threeStart();
+    }
+</script>
+
+</body>
+</html>
