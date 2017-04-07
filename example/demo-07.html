@@ -6,8 +6,9 @@
     <script src="../vendor/three.js"></script>
     <script src="../vendor/stats.js"></script>
     <script src="../vendor/dat.gui.js"></script>
-    <script type="text/javascript" src="../vendor/MTLLoader.js"></script>
-    <script type="text/javascript" src="../vendor/OBJLoader.js"></script>
+    <script type="text/javascript" src="../vendor/loaders/DDSLoader.js"></script>
+    <script type="text/javascript" src="../vendor/loaders/MTLLoader.js"></script>
+    <script type="text/javascript" src="../vendor/loaders/OBJLoader.js"></script>
     <style>
         * {
             margin: 0;
@@ -23,9 +24,13 @@
 </head>
 <body>
 <div id="canvas-wrapper"></div>
+<div id = "progress">
+    <p></p>
+</div>
 <ul>
     <li>知道怎么引入外部模型</li>
     <li>知道怎么引入带纹理的外部模型</li>
+    <li>知道怎么自定义模型的纹理</li>
 </ul>
 <script>
     window.onload = function () {
@@ -44,7 +49,7 @@
 
         function initCamera() {
             camera = new THREE.PerspectiveCamera(75, width / height, 1, 10000);
-            //camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 10, 1000 );
+//            camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 10, 1000 );
             camera.position.set(8, 8, 8);
             camera.lookAt(new THREE.Vector3(0, 2, 0));
         }
@@ -90,42 +95,73 @@
         function initObject() {
             // material loader
 
-            // 映入不带纹理的模型
-            var loader = new THREE.OBJLoader();
-            loader.load('../model/port/port.obj', function(obj) {
-                obj.traverse(function(child) {
-                    if (child instanceof THREE.Mesh) {
-                        child.material = new THREE.MeshLambertMaterial({
-                            color: 0xffff00,
-                            side: THREE.DoubleSide
-                        });
-                    }
-                });
-                mesh = obj;
-                scene.add(obj);
-            });
-
-             // 引入带纹理的模型
-//            var mtlLoader = new THREE.MTLLoader();
-//            mtlLoader.setPath('../model/port/');
-//            mtlLoader.load('port.mtl', function(materials) {
-//                materials.side = 2;
-//                var objLoader = new THREE.OBJLoader();
-//                objLoader.setMaterials(materials);
-//                objLoader.setPath('../model/port/');
-//                objLoader.load('port.obj', function ( object ) {
-//                    if (object.children.length > 0) {
-//                        mesh = object.children[0];
-//                        scene.add( mesh );
+            // 引入不带纹理的模型
+//            var loader = new THREE.OBJLoader();
+//            loader.load('../model/port/port.obj', function(obj) {
+//                obj.traverse(function(child) {
+//                    if (child instanceof THREE.Mesh) {
+//                        child.material = new THREE.MeshLambertMaterial({
+//                            color: 0xffff00,
+//                            side: THREE.DoubleSide
+//                        });
 //                    }
 //                });
+//                mesh = obj;
+//                scene.add(obj);
 //            });
+
+             // 引入带纹理的模型
+            var mtlLoader = new THREE.MTLLoader();
+            mtlLoader.setPath('../model/port/');
+            mtlLoader.load('port.mtl', function(materials) {
+                materials.side = 2;
+                var objLoader = new THREE.OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.setPath('../model/port/');
+                objLoader.load('port.obj', function ( object ) {
+                    if (object.children.length > 0) {
+                        mesh = object.children[0];
+                        scene.add( mesh );
+                    }
+                });
+            });
+
+            // 引入模型，自定义贴图 tv
+//            var manager = new THREE.LoadingManager();
+//            var texture = new THREE.Texture();
+//            var loader = new THREE.ImageLoader( manager );
+//            loader.load( '../texture/wood.jpg', function ( image ) {
+//                texture.image = image;
+//                texture.needsUpdate = true;
+//            } );
+//
+//            loader = new THREE.OBJLoader(manager);
+//            var onLoad = function(object){
+//                object.traverse( function ( child ) {
+//                    if ( child instanceof THREE.Mesh ) {
+//                        child.material.map = texture;
+//                    }
+//                } );
+//                mesh = object;
+//                scene.add( object);
+//            };
+//            var onProgress = function ( xhr ) {
+//                if ( xhr.lengthComputable ) {
+//                    var percentComplete = xhr.loaded / xhr.total * 100;
+//                    console.log( Math.round(percentComplete, 2) + '% downloaded' );
+//                    document.getElementById('progress').innerText= Math.round(percentComplete, 2) + '%下载' ;
+//                }
+//            };
+//            var onError = function ( xhr ) {};
+//            loader.load('../model/tv/tv.obj',onLoad,onProgress,onError);
 
         }
 
         function initLight() {
-            light = new THREE.DirectionalLight( 0xffffff );
-            light.position.set( 3, 3, 3 ).normalize();
+
+            light = new THREE.DirectionalLight( 0xffffff);
+            light.position.set(0,0,8000 );
+
             scene.add(light);
         }
 
@@ -140,7 +176,7 @@
         function createUI() {
             var FizzyText = function() {
                 this.fov = 75;
-                this.lightColor1 = '#ff0000';
+                this.lightColor1 = '#ffffff';
             };
 
             controlOption = new FizzyText();
@@ -150,14 +186,15 @@
             gui.addColor(controlOption, 'lightColor1').name("灯光1");
         }
 
-        function changeFov () {
-            setCameraFov(controlOption.fov);
-        };
-
-        function setCameraFov(fov){
+        function changeFov (fov) {
             camera.fov = fov;
             camera.updateProjectionMatrix();
+        };
+
+        function changeLight1(color) {
+            light.color.set(color);
         }
+
 
         function animate() {
             requestAnimationFrame( animate );
@@ -176,7 +213,8 @@
                 mesh.rotation.y += 0.01;
             }
             stats.update();
-            changeFov();
+            changeFov(controlOption.fov);
+            changeLight1(controlOption.lightColor1);
             renderer.render( scene, camera );
         }
 
