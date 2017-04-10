@@ -97,57 +97,57 @@
             // material loader
 
             // 引入不带纹理的模型 壶
-            var loader = new THREE.OBJLoader();
-            loader.load('../model/port/port.obj', function(obj) {
-                obj.traverse(function(child) {
-                    if (child instanceof THREE.Mesh) {
-                        child.material = new THREE.MeshLambertMaterial({
-                            side: THREE.DoubleSide
-                        });
-                    }
-                });
-                obj.position.x = 230;
-                obj.position.y = 100;
-                obj.position.z = 200;
-                meshPortWithoutMtl = obj;
-                scene.add(obj);
-            });
+//            var loader = new THREE.OBJLoader();
+//            loader.load('../model/port/port.obj', function(obj) {
+//                obj.traverse(function(child) {
+//                    if (child instanceof THREE.Mesh) {
+//                        child.material = new THREE.MeshLambertMaterial({
+//                            side: THREE.DoubleSide
+//                        });
+//                    }
+//                });
+//                obj.position.x = 230;
+//                obj.position.y = 100;
+//                obj.position.z = 200;
+//                meshPortWithoutMtl = obj;
+//                scene.add(obj);
+//            });
 
             // 引入不带纹理的模型 tv
-            var loader = new THREE.OBJLoader();
-            loader.load('../model/tv/tv.obj', function(obj) {
-                obj.traverse(function(child) {
-                    if (child instanceof THREE.Mesh) {
-                        child.material = new THREE.MeshLambertMaterial({
-                            side: THREE.DoubleSide
-                        });
-                    }
-                });
-                obj.position.x = 210;
-                obj.position.y = 100;
-                obj.position.z = 230;
-                meshTvWithoutMtl = obj;
-                scene.add(obj);
-            });
+//            var loader = new THREE.OBJLoader();
+//            loader.load('../model/tv/tv.obj', function(obj) {
+//                obj.traverse(function(child) {
+//                    if (child instanceof THREE.Mesh) {
+//                        child.material = new THREE.MeshLambertMaterial({
+//                            side: THREE.DoubleSide
+//                        });
+//                    }
+//                });
+//                obj.position.x = 210;
+//                obj.position.y = 100;
+//                obj.position.z = 230;
+//                meshTvWithoutMtl = obj;
+//                scene.add(obj);
+//            });
 
              // 引入带纹理的模型 壶
-            var mtlLoader = new THREE.MTLLoader();
-            mtlLoader.setPath('../model/port/');
-            mtlLoader.load('port.mtl', function(materials) {
-                materials.side = 2;
-                var objLoader = new THREE.OBJLoader();
-                objLoader.setMaterials(materials);
-                objLoader.setPath('../model/port/');
-                objLoader.load('port.obj', function ( object ) {
-                    if (object.children.length > 0) {
-                        object.position.x = 210;
-                        object.position.y = 100;
-                        object.position.z = 210;
-                        meshPortWithMtl = object;
-                        scene.add( meshPortWithMtl );
-                    }
-                });
-            });
+//            var mtlLoader = new THREE.MTLLoader();
+//            mtlLoader.setPath('../model/port/');
+//            mtlLoader.load('port.mtl', function(materials) {
+//                materials.side = 2;
+//                var objLoader = new THREE.OBJLoader();
+//                objLoader.setMaterials(materials);
+//                objLoader.setPath('../model/port/');
+//                objLoader.load('port.obj', function ( object ) {
+//                    if (object.children.length > 0) {
+//                        object.position.x = 210;
+//                        object.position.y = 100;
+//                        object.position.z = 210;
+//                        meshPortWithMtl = object;
+//                        scene.add( meshPortWithMtl );
+//                    }
+//                });
+//            });
 
             // 引入带纹理的模型 人物
 //            THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
@@ -168,55 +168,55 @@
                 });
             });
 
-            THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
-
-            var mtlLoader = new THREE.MTLLoader();
-            mtlLoader.setPath( '../model/man/' );
-            mtlLoader.load( 'male02_dds.mtl', function( materials ) {
-                materials.preload();
-                var objLoader = new THREE.OBJLoader();
-                objLoader.setMaterials( materials );
-                objLoader.setPath( '../model/man/' );
-                objLoader.load( 'male02.obj', function ( object ) {
-                    object.position.x= 80;
-                    object.position.y = - 95;
-                    object.position.z = 0;
-                    meshPeople2 = object;
-                    scene.add( object );
-                });
-            });
+//            THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
+//
+//            var mtlLoader = new THREE.MTLLoader();
+//            mtlLoader.setPath( '../model/man/' );
+//            mtlLoader.load( 'male02_dds.mtl', function( materials ) {
+//                materials.preload();
+//                var objLoader = new THREE.OBJLoader();
+//                objLoader.setMaterials( materials );
+//                objLoader.setPath( '../model/man/' );
+//                objLoader.load( 'male02.obj', function ( object ) {
+//                    object.position.x= 80;
+//                    object.position.y = - 95;
+//                    object.position.z = 0;
+//                    meshPeople2 = object;
+//                    scene.add( object );
+//                });
+//            });
 
             // 引入模型，自定义贴图 tv
-            var manager = new THREE.LoadingManager();
-            var texture = new THREE.Texture();
-            var loader = new THREE.ImageLoader( manager );
-            loader.load( '../texture/wood.jpg', function ( image ) {
-                texture.image = image;
-                texture.needsUpdate = true;
-            } );
+//            var manager = new THREE.LoadingManager();
+//            var texture = new THREE.Texture();
+//            var loader = new THREE.ImageLoader( manager );
+//            loader.load( '../texture/wood.jpg', function ( image ) {
+//                texture.image = image;
+//                texture.needsUpdate = true;
+//            } );
 
-            loader = new THREE.OBJLoader(manager);
-            var onLoad = function(object){
-                object.traverse( function ( child ) {
-                    if ( child instanceof THREE.Mesh ) {
-                        child.material.map = texture;
-                    }
-                } );
-                object.position.x = 230;
-                object.position.y = 100;
-                object.position.z = 230;
-                meshTvWithCoustom = object;
-                scene.add( meshTvWithCoustom);
-            };
-            var onProgress = function ( xhr ) {
-                if ( xhr.lengthComputable ) {
-                    var percentComplete = xhr.loaded / xhr.total * 100;
-                    console.log( Math.round(percentComplete, 2) + '% downloaded' );
-                    document.getElementById('progress').innerText= Math.round(percentComplete, 2) + '%下载' ;
-                }
-            };
-            var onError = function ( xhr ) {};
-            loader.load('../model/tv/tv.obj',onLoad,onProgress,onError);
+//            loader = new THREE.OBJLoader(manager);
+//            var onLoad = function(object){
+//                object.traverse( function ( child ) {
+//                    if ( child instanceof THREE.Mesh ) {
+//                        child.material.map = texture;
+//                    }
+//                } );
+//                object.position.x = 230;
+//                object.position.y = 100;
+//                object.position.z = 230;
+//                meshTvWithCoustom = object;
+//                scene.add( meshTvWithCoustom);
+//            };
+//            var onProgress = function ( xhr ) {
+//                if ( xhr.lengthComputable ) {
+//                    var percentComplete = xhr.loaded / xhr.total * 100;
+//                    console.log( Math.round(percentComplete, 2) + '% downloaded' );
+//                    document.getElementById('progress').innerText= Math.round(percentComplete, 2) + '%下载' ;
+//                }
+//            };
+//            var onError = function ( xhr ) {};
+//            loader.load('../model/tv/tv.obj',onLoad,onProgress,onError);
 
         }
 
@@ -285,7 +285,7 @@
                 meshTvWithoutMtl.rotation.y += 0.01;
             }
             if (meshPeople) {
-                meshPeople.rotation.y += 0.01;
+                meshPeople.rotation.y += 0.1;
             }
             if (meshPeople2) {
                 meshPeople2.rotation.y += 0.01;
@@ -300,6 +300,12 @@
             requestAnimationFrame( animate );
             render();
         }
+//        function animate() {
+//            render();
+//            setTimeout(function () {
+//                animate()
+//            },0);
+//        }
 
         function threeStart() {
             initThree();
