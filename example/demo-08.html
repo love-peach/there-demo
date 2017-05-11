@@ -7,10 +7,11 @@
     <script src="../vendor/three.js"></script>
     <script src="../vendor/stats.js"></script>
     <script src="../vendor/dat.gui.js"></script>
-    <script type="text/javascript" src="../vendor/loaders/DDSLoader.js"></script>
-    <script type="text/javascript" src="../vendor/loaders/MTLLoader.js"></script>
-    <script type="text/javascript" src="../vendor/loaders/OBJLoader.js"></script>
+    <script type="text/javascript" src="../vendor/loaders/PLYLoader.js"></script>
     <style>
+        html,body {
+            height: 100%;
+        }
         * {
             margin: 0;
         }
@@ -18,7 +19,7 @@
             position: relative;
             border: none;
             width: 100%;
-            height: 600px;
+            height: 100%;
             background-color: #EEEEEE;
         }
     </style>
@@ -29,13 +30,13 @@
     <p></p>
 </div>
 <ul>
-    <li>知道怎么引入外部模型</li>
-    <li>知道怎么引入带纹理的外部模型</li>
-    <li>知道怎么自定义模型的纹理</li>
+    <li>知道怎么引入PLY模型</li>
+    <li>知道怎么通过api话坐标系 helper</li>
+    <li>知道怎么让摄像机旋转，并且盯住一个点看</li>
 </ul>
 <script>
     window.onload = function () {
-        var renderer, camera, scene, meshPortWithoutMtl, meshPortWithMtl, meshTvWithoutMtl, meshTvWithCoustom, meshPeople, meshPeople2, light,stats,controlOption;
+        var renderer, camera, scene, plane,light,stats,sculptureGirl,controlOption;
         var canvasWrapper = document.getElementById('canvas-wrapper');
         var width = canvasWrapper.clientWidth;
         var height = canvasWrapper.clientHeight;
@@ -45,120 +46,175 @@
                 antialias: true,
             });
             renderer.setSize(width, height);
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.gammaInput = true;
+            renderer.gammaOutput = true;
+
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.renderReverseSided = false;
             canvasWrapper.appendChild(renderer.domElement);
         }
 
         function initCamera() {
-            camera = new THREE.PerspectiveCamera(75, width / height, 1, 10000);
-//            camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 10, 1000 );
-            camera.position.set(250,120, 250);
-            camera.lookAt(new THREE.Vector3(0, 0, 0));
+            camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 15 );
+            camera.position.set( 3, 0.15, 3 );
+            camera.lookAt(new THREE.Vector3(0, -0.1, 0));
         }
 
         function initScene() {
             scene = new THREE.Scene();
             scene.add(camera);
-            drawAxes(scene);
+            initAxis();
+
+            scene.fog = new THREE.Fog( 0x72645b, 2, 15);
+        }
+        
+        function initAxis() {
+            var axisHelper = new THREE.AxisHelper( 1000 );
+            scene.add( axisHelper );
         }
 
-        function drawAxes(scene) {
-            // x-axis
-            var xGeo = new THREE.Geometry();
-            xGeo.vertices.push(new THREE.Vector3(0, 0, 0));
-            xGeo.vertices.push(new THREE.Vector3(1000, 0, 0));
-            var xMat = new THREE.LineBasicMaterial({
-                color: 0xff0000
-            });
-            var xAxis = new THREE.Line(xGeo, xMat);
-            scene.add(xAxis);
+        function initGround() {
+            plane = new THREE.Mesh(
+                    new THREE.PlaneBufferGeometry( 40, 40 ),
+                    new THREE.MeshPhongMaterial( { color: 0xaaaa22 } )
+            );
+            plane.rotation.x = -Math.PI/2;
+            plane.position.y = -0.5;
+            scene.add( plane );
 
-            // y-axis
-            var yGeo = new THREE.Geometry();
-            yGeo.vertices.push(new THREE.Vector3(0, 0, 0));
-            yGeo.vertices.push(new THREE.Vector3(0, 1000, 0));
-            var yMat = new THREE.LineBasicMaterial({
-                color: 0x00ff00
-            });
-            var yAxis = new THREE.Line(yGeo, yMat);
-            scene.add(yAxis);
-
-            // z-axis
-            var zGeo = new THREE.Geometry();
-            zGeo.vertices.push(new THREE.Vector3(0, 0, 0));
-            zGeo.vertices.push(new THREE.Vector3(0, 0, 1000));
-            var zMat = new THREE.LineBasicMaterial({
-                color: 0x00ccff
-            });
-            var zAxis = new THREE.Line(zGeo, zMat);
-            scene.add(zAxis);
+            plane.receiveShadow = true;
         }
+
 
         function initObject() {
+            var loader = new THREE.PLYLoader();
+            loader.load( '../model/ply/dolphins.ply', function ( geometry ) {
 
+                geometry.computeVertexNormals();
+
+                var material = new THREE.MeshStandardMaterial( { color: 0x0055ff, shading: THREE.FlatShading } );
+                var mesh = new THREE.Mesh( geometry, material );
+
+                mesh.position.y = - 0.2;
+                mesh.position.z =   0.3;
+                mesh.rotation.x = - Math.PI / 2;
+                mesh.scale.multiplyScalar( 0.001 );
+
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+
+                scene.add( mesh );
+
+            } );
+            loader.load( '../model/ply/Lucy100k.ply', function ( geometry ) {
+
+                geometry.computeVertexNormals();
+
+                var material = new THREE.MeshStandardMaterial( { color: 0x0055ff, shading: THREE.FlatShading } );
+                sculptureGirl = new THREE.Mesh( geometry, material );
+
+                sculptureGirl.position.x = - 0.2;
+                sculptureGirl.position.y = - 0.02;
+                sculptureGirl.position.z = - 0.2;
+                sculptureGirl.scale.multiplyScalar( 0.0006 );
+
+                sculptureGirl.castShadow = true;
+                sculptureGirl.receiveShadow = true;
+                scene.add( sculptureGirl );
+
+            } );
 
         }
-
         function initLight() {
+            scene.add( new THREE.HemisphereLight( 0x443333, 0x111122 ) );
+            addShadowedLight( 1, 1, 1, 0xffffff, 1.35 );
+            addShadowedLight( 0.5, 1, -1, 0xffaa00, 1 );
+        }
+        function addShadowedLight( x, y, z, color, intensity ) {
 
-            var ambient = new THREE.AmbientLight( 0x999999 );
-            scene.add( ambient );
+            var directionalLight = new THREE.DirectionalLight( color, intensity );
+            directionalLight.position.set( x, y, z );
+            scene.add( directionalLight );
 
+            directionalLight.castShadow = true;
 
-            light = new THREE.DirectionalLight( 0xffeedd);
-            light.position.set(0,0,8 );
+            var d = 1;
+            directionalLight.shadow.camera.left = -d;
+            directionalLight.shadow.camera.right = d;
+            directionalLight.shadow.camera.top = d;
+            directionalLight.shadow.camera.bottom = -d;
 
-            scene.add(light);
+            directionalLight.shadow.camera.near = 1;
+            directionalLight.shadow.camera.far = 4;
+
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+
+            directionalLight.shadow.bias = -0.005;
+
         }
 
         function initStats() {
             stats = new Stats();
-//            stats.dom.style.position = 'absolute';
-//            stats.dom.style.left = 'inherit';
-//            stats.dom.style.right = '0px';
             canvasWrapper.appendChild( stats.dom );
         }
 
         function createUI() {
             var FizzyText = function() {
                 this.fov = 45;
-                this.lightColor1 = '#dcdcdc';
+                this.girlScale = 0.0006
+                this.planeColor = '#aaaa22';
+                this.bgColor = "#cf6c2c";
             };
-
             controlOption = new FizzyText();
             var gui = new dat.GUI({ autoPlace: true});
-//            gui.domElement.style.float = "inherit";
             gui.add(controlOption, "fov", 0, 180).name("视角大小");
-            gui.addColor(controlOption, 'lightColor1').name("灯光1");
+            gui.add(controlOption, "girlScale", 0.0001, 0.001).name("女神大小");
+            gui.addColor(controlOption, 'bgColor').name("背景颜色");
+            gui.addColor(controlOption, 'planeColor').name("地板颜色");
         }
 
         function changeFov (fov) {
             camera.fov = fov;
             camera.updateProjectionMatrix();
         }
-
-        function changeLight1(color) {
-            light.color.set(color);
+        function changeGirlScale(scalar) {
+            sculptureGirl.scale.setScalar(scalar);
+        }
+        function changePlaneColor (color) {
+            plane.material.color.set(color);
+        }
+        function changeBgColor(color) {
+            scene.fog.color.set(color);
         }
 
         function onWindowResize() {
             var width = canvasWrapper.clientWidth;
             var height = canvasWrapper.clientHeight;
-            camera.aspect = width / height;
             camera.updateProjectionMatrix();
             renderer.setSize( width, height );
         }
+
         function render() {
-            stats.update();
             changeFov(controlOption.fov);
-            changeLight1(controlOption.lightColor1);
+            changePlaneColor(controlOption.planeColor);
+            changeBgColor(controlOption.bgColor);
+            if (sculptureGirl) {
+                changeGirlScale(controlOption.girlScale);
+            }
+            var timer = Date.now() * 0.0005;
+            renderer.setClearColor( scene.fog.color );
+            camera.position.x = Math.sin( timer ) * 2.5;
+            camera.position.z = Math.cos( timer ) * 2.5;
+            camera.lookAt(new THREE.Vector3(0, -0.1, 0));
             renderer.render( scene, camera );
         }
 
         function animate() {
+            requestAnimationFrame( animate );
             render();
-            setTimeout(function () {
-                animate()
-            },0);
+            stats.update();
         }
 
 
@@ -166,6 +222,7 @@
             initThree();
             initCamera();
             initScene();
+            initGround();
             initLight();
             initObject();
             initStats();
