@@ -7,6 +7,7 @@
     <script src="../vendor/three.js"></script>
     <script src="../vendor/stats.js"></script>
     <script src="../vendor/dat.gui.js"></script>
+    <script src="../vendor/OrbitControls.js"></script>
     <script type="text/javascript" src="../vendor/loaders/PLYLoader.js"></script>
     <style>
         html,body {
@@ -33,6 +34,7 @@
     <li>知道怎么引入PLY模型</li>
     <li>知道怎么通过api话坐标系 helper</li>
     <li>知道怎么让摄像机旋转，并且盯住一个点看</li>
+    <li>知道怎么添加相机控制，cameraControls。OrbitControls.js </li>
 </ul>
 <script>
     window.onload = function () {
@@ -40,6 +42,7 @@
         var canvasWrapper = document.getElementById('canvas-wrapper');
         var width = canvasWrapper.clientWidth;
         var height = canvasWrapper.clientHeight;
+        var cameraControls;
 
         function initThree() {
             renderer = new THREE.WebGLRenderer({
@@ -53,12 +56,17 @@
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.renderReverseSided = false;
             canvasWrapper.appendChild(renderer.domElement);
+
         }
 
         function initCamera() {
             camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 15 );
             camera.position.set( 3, 0.15, 3 );
             camera.lookAt(new THREE.Vector3(0, -0.1, 0));
+            // CONTROLS
+            cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
+            cameraControls.target.set( 0, 0, 0 );
+            cameraControls.addEventListener( 'change', render );
         }
 
         function initScene() {
@@ -168,7 +176,6 @@
                 this.isDolphinsRotation = true;
                 this.isGirlRotation = true;
                 this.isCameraRotation = true;
-                this.newShading = "glossy";
             };
             controlOption = new FizzyText();
             var gui = new dat.GUI({ autoPlace: true});
@@ -201,6 +208,8 @@
             camera.updateProjectionMatrix();
             renderer.setSize( width, height );
         }
+
+
 
         function render() {
             changeFov(controlOption.fov);
