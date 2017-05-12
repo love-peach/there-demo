@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cmn-Hans">
 <head>
     <meta charset="UTF-8">
     <title>demo-08</title>
@@ -36,10 +36,37 @@
 </ul>
 <script>
     window.onload = function () {
-        var renderer, camera, scene, plane,light,stats,sculptureGirl,controlOption;
+        var renderer, camera, scene, plane,light,stats,dolphins,sculptureGirl,controlOption;
         var canvasWrapper = document.getElementById('canvas-wrapper');
         var width = canvasWrapper.clientWidth;
         var height = canvasWrapper.clientHeight;
+        var wireMaterial, flatMaterial, gouraudMaterial, phongMaterial, texturedMaterial, reflectiveMaterial;
+        var textureCube;
+
+
+        // 贴图纹理
+        var textureMap = new THREE.TextureLoader().load( '../texture/UV_Grid_Sm.jpg' );
+        textureMap.wrapS = textureMap.wrapT = THREE.RepeatWrapping;
+        textureMap.anisotropy = 16;
+
+        // REFLECTION MAP
+        var path = "../texture/skybox/";
+        var urls = [
+            path + "px.jpg", path + "nx.jpg",
+            path + "py.jpg", path + "ny.jpg",
+            path + "pz.jpg", path + "nz.jpg"
+        ];
+        textureCube = new THREE.CubeTextureLoader().load( urls );
+        // 不同材质
+        var materialColor = new THREE.Color();
+        materialColor.setRGB( 1.0, 1.0, 1.0 );
+
+        wireMaterial = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, wireframe: true } ) ;
+        flatMaterial = new THREE.MeshPhongMaterial( { color: materialColor, specular: 0x0, shading: THREE.FlatShading, side: THREE.DoubleSide } );
+        gouraudMaterial = new THREE.MeshLambertMaterial( { color: materialColor, side: THREE.DoubleSide } );
+        phongMaterial = new THREE.MeshPhongMaterial( { color: materialColor, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
+        texturedMaterial = new THREE.MeshPhongMaterial( { color: materialColor, map: textureMap, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
+        reflectiveMaterial = new THREE.MeshPhongMaterial( { color: materialColor, envMap: textureCube, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
 
         function initThree() {
             renderer = new THREE.WebGLRenderer({
@@ -77,12 +104,12 @@
         function initGround() {
             plane = new THREE.Mesh(
                     new THREE.PlaneBufferGeometry( 40, 40 ),
-                    new THREE.MeshPhongMaterial( { color: 0xaaaa22 } )
+                    new THREE.MeshPhongMaterial( { color: 0x999999, specular: 0x101010 } )
             );
             plane.rotation.x = -Math.PI/2;
             plane.position.y = -0.5;
             scene.add( plane );
-
+            console.log(plane, 'plane');
             plane.receiveShadow = true;
         }
 
@@ -93,25 +120,25 @@
 
                 geometry.computeVertexNormals();
 
-                var material = new THREE.MeshStandardMaterial( { color: 0x0055ff, shading: THREE.FlatShading } );
-                var mesh = new THREE.Mesh( geometry, material );
+                var material = new THREE.MeshStandardMaterial( { color: 0xffffff, shading: THREE.FlatShading } );
+                dolphins = new THREE.Mesh( geometry, material );
 
-                mesh.position.y = - 0.2;
-                mesh.position.z =   0.3;
-                mesh.rotation.x = - Math.PI / 2;
-                mesh.scale.multiplyScalar( 0.001 );
+                dolphins.position.y = - 0.2;
+                dolphins.position.z =   0.3;
+                dolphins.rotation.x = - Math.PI / 2;
+                dolphins.scale.multiplyScalar( 0.001 );
 
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
+                dolphins.castShadow = true;
+                dolphins.receiveShadow = true;
 
-                scene.add( mesh );
+                scene.add( dolphins );
 
             } );
             loader.load( '../model/ply/Lucy100k.ply', function ( geometry ) {
 
                 geometry.computeVertexNormals();
 
-                var material = new THREE.MeshStandardMaterial( { color: 0x0055ff, shading: THREE.FlatShading } );
+                var material = new THREE.MeshStandardMaterial( { color: 0xffffff, shading: THREE.FlatShading } );
                 sculptureGirl = new THREE.Mesh( geometry, material );
 
                 sculptureGirl.position.x = - 0.2;
@@ -145,8 +172,8 @@
             directionalLight.shadow.camera.top = d;
             directionalLight.shadow.camera.bottom = -d;
 
-            directionalLight.shadow.camera.near = 1;
-            directionalLight.shadow.camera.far = 4;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 10;
 
             directionalLight.shadow.mapSize.width = 1024;
             directionalLight.shadow.mapSize.height = 1024;
@@ -163,9 +190,13 @@
         function createUI() {
             var FizzyText = function() {
                 this.fov = 45;
-                this.girlScale = 0.0006
-                this.planeColor = '#aaaa22';
-                this.bgColor = "#cf6c2c";
+                this.girlScale = 0.0006;
+                this.planeColor = '#999999';
+                this.bgColor = "#72645b";
+                this.isDolphinsRotation = true;
+                this.isGirlRotation = true;
+                this.isCameraRotation = true;
+                this.newShading = "glossy";
             };
             controlOption = new FizzyText();
             var gui = new dat.GUI({ autoPlace: true});
@@ -173,6 +204,10 @@
             gui.add(controlOption, "girlScale", 0.0001, 0.001).name("女神大小");
             gui.addColor(controlOption, 'bgColor').name("背景颜色");
             gui.addColor(controlOption, 'planeColor').name("地板颜色");
+            gui.add(controlOption, 'isDolphinsRotation').name("海豚旋转");
+            gui.add(controlOption, 'isGirlRotation').name("女神旋转");
+            gui.add(controlOption, 'isCameraRotation').name("相机旋转");
+            gui.add( controlOption, "newShading", [ "wireframe", "flat", "smooth", "glossy", "textured", "reflective" ] ).name( "底纹" );
         }
 
         function changeFov (fov) {
@@ -200,13 +235,28 @@
             changeFov(controlOption.fov);
             changePlaneColor(controlOption.planeColor);
             changeBgColor(controlOption.bgColor);
+
+            var timer = Date.now() * 0.0005;
             if (sculptureGirl) {
                 changeGirlScale(controlOption.girlScale);
             }
-            var timer = Date.now() * 0.0005;
             renderer.setClearColor( scene.fog.color );
-            camera.position.x = Math.sin( timer ) * 2.5;
-            camera.position.z = Math.cos( timer ) * 2.5;
+
+            // 女神自转
+            if (sculptureGirl && controlOption.isGirlRotation) {
+                sculptureGirl.rotation.y = -timer;
+            }
+            // 相机旋转
+            if (controlOption.isCameraRotation) {
+                camera.position.x = Math.sin( timer * 0.5 ) * 2;
+                camera.position.z = Math.cos( timer * 0.5 ) * 2;
+            }
+            // 海豚旋转
+            if(dolphins && controlOption.isDolphinsRotation) {
+                dolphins.position.setX(-Math.sin( timer ) * 0.5);
+                dolphins.position.setZ(-Math.cos( timer ) * 0.5);
+                dolphins.rotation.z = timer;
+            }
             camera.lookAt(new THREE.Vector3(0, -0.1, 0));
             renderer.render( scene, camera );
         }
