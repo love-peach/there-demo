@@ -66,7 +66,7 @@
             // CONTROLS
             cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
             cameraControls.target.set( 0, 0, 0 );
-            cameraControls.addEventListener( 'change', render );
+//            cameraControls.addEventListener( 'change', render );
         }
 
         function initScene() {
@@ -101,7 +101,7 @@
 
                 geometry.computeVertexNormals();
 
-                var material = new THREE.MeshStandardMaterial( { color: 0xffffff, shading: THREE.FlatShading } );
+                var material = new THREE.MeshStandardMaterial( { color: 0xffffff, shading: THREE.FlatShading,side: THREE.DoubleSide } );
                 dolphins = new THREE.Mesh( geometry, material );
 
                 dolphins.position.y = - 0.2;
@@ -119,7 +119,7 @@
 
                 geometry.computeVertexNormals();
 
-                var material = new THREE.MeshStandardMaterial( { color: 0xffffff, shading: THREE.FlatShading } );
+                var material = new THREE.MeshStandardMaterial( { color: 0xffffff, shading: THREE.FlatShading, side: THREE.DoubleSide } );
                 sculptureGirl = new THREE.Mesh( geometry, material );
 
                 sculptureGirl.position.x = - 0.2;
@@ -226,16 +226,18 @@
             if (sculptureGirl && controlOption.isGirlRotation) {
                 sculptureGirl.rotation.y = -timer;
             }
-            // 相机旋转
-            if (controlOption.isCameraRotation) {
-                camera.position.x = Math.sin( timer * 0.5 ) * 2;
-                camera.position.z = Math.cos( timer * 0.5 ) * 2;
-            }
+
             // 海豚旋转
             if(dolphins && controlOption.isDolphinsRotation) {
                 dolphins.position.setX(-Math.sin( timer ) * 0.5);
                 dolphins.position.setZ(-Math.cos( timer ) * 0.5);
                 dolphins.rotation.z = timer;
+            }
+
+            // 相机旋转
+            if (controlOption.isCameraRotation) {
+                camera.position.x = Math.sin( timer * 0.5 ) * 2;
+                camera.position.z = Math.cos( timer * 0.5 ) * 2;
             }
             camera.lookAt(new THREE.Vector3(0, -0.1, 0));
             renderer.render( scene, camera );
