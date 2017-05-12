@@ -40,33 +40,6 @@
         var canvasWrapper = document.getElementById('canvas-wrapper');
         var width = canvasWrapper.clientWidth;
         var height = canvasWrapper.clientHeight;
-        var wireMaterial, flatMaterial, gouraudMaterial, phongMaterial, texturedMaterial, reflectiveMaterial;
-        var textureCube;
-
-
-        // 贴图纹理
-        var textureMap = new THREE.TextureLoader().load( '../texture/UV_Grid_Sm.jpg' );
-        textureMap.wrapS = textureMap.wrapT = THREE.RepeatWrapping;
-        textureMap.anisotropy = 16;
-
-        // REFLECTION MAP
-        var path = "../texture/skybox/";
-        var urls = [
-            path + "px.jpg", path + "nx.jpg",
-            path + "py.jpg", path + "ny.jpg",
-            path + "pz.jpg", path + "nz.jpg"
-        ];
-        textureCube = new THREE.CubeTextureLoader().load( urls );
-        // 不同材质
-        var materialColor = new THREE.Color();
-        materialColor.setRGB( 1.0, 1.0, 1.0 );
-
-        wireMaterial = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, wireframe: true } ) ;
-        flatMaterial = new THREE.MeshPhongMaterial( { color: materialColor, specular: 0x0, shading: THREE.FlatShading, side: THREE.DoubleSide } );
-        gouraudMaterial = new THREE.MeshLambertMaterial( { color: materialColor, side: THREE.DoubleSide } );
-        phongMaterial = new THREE.MeshPhongMaterial( { color: materialColor, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
-        texturedMaterial = new THREE.MeshPhongMaterial( { color: materialColor, map: textureMap, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
-        reflectiveMaterial = new THREE.MeshPhongMaterial( { color: materialColor, envMap: textureCube, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
 
         function initThree() {
             renderer = new THREE.WebGLRenderer({
@@ -151,7 +124,6 @@
                 scene.add( sculptureGirl );
 
             } );
-
         }
         function initLight() {
             scene.add( new THREE.HemisphereLight( 0x443333, 0x111122 ) );
@@ -207,7 +179,6 @@
             gui.add(controlOption, 'isDolphinsRotation').name("海豚旋转");
             gui.add(controlOption, 'isGirlRotation').name("女神旋转");
             gui.add(controlOption, 'isCameraRotation').name("相机旋转");
-            gui.add( controlOption, "newShading", [ "wireframe", "flat", "smooth", "glossy", "textured", "reflective" ] ).name( "底纹" );
         }
 
         function changeFov (fov) {
